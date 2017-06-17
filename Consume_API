@@ -1,0 +1,98 @@
+
+LINKS FOR SERIALIZATION AND DESERIALIZTION JSON IN C#
+http://www.c-sharpcorner.com/uploadfile/manas1/json-serialization-and-deserialization-using-json-net-librar/
+http://www.c-sharpcorner.com/article/json-serialization-and-deserialization-in-c-sharp/
+
+
+1.    GET REQUEST API 
+                HttpClient client = new HttpClient();
+
+                string authInfo = "SMSALAPIUSER990077623" + ":" + "z0FlRG98M5nz6nHDw2cN68rgT";     // API USERNAME and PASSWORD
+                authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authInfo);
+
+
+                client.BaseAddress = new Uri("http://api.smsala.com/");                         // BASE URI
+
+                HttpResponseMessage response = client.GetAsync("api/GetTimeZoneList").Result;   // Resorce URI
+
+                if (response.IsSuccessStatusCode)
+                {
+
+                    var data = response.Content.ReadAsStringAsync().Result;
+                    ViewBag.TimeZone = ParseJson(data);
+
+
+                    return View();
+                }
+
+
+   NOW PARSER RETURN JSON OF API IN CLASS OBJECT
+
+    protected string ParseJson(string post_response)
+            {
+
+
+                dynamic jsonObj = JsonConvert.DeserializeObject(post_response);   // CONVERTS JSON INTO CLASS USING DESERIALIZEOGJECT METHOD
+                string options = "";
+                foreach (var obj in jsonObj)
+                {
+
+                    options += "<option value = '" + obj.TimeZoneID + "'> " + obj.Display + " </option>";
+
+                }
+
+                return options.ToString();
+            }
+        }
+
+
+2. POST REQUEST AND GET RESPONE IN JSON 
+
+
+  try
+                        {
+                            HttpClient client = new HttpClient();
+                            string authInfo = "SMSALAPIUSER990077623" + ":" + "z0FlRG98M5nz6nHDw2cN68rgT";     
+                            authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authInfo);
+                            UserRegistrationRequestModel post_values = new UserRegistrationRequestModel                      //API PARAMETERS AND THERE VALUES
+                            {  
+
+                                CompanyName = model.CompanyName,
+                                CompanyEmail = model.CompanyEmail,
+                                BillingEmail = model.CompanyEmail,
+                                Phone = model.Phone,
+                                CustomerPlanID = PlanID,
+                                CustomerRouteID = RouteID,
+                                CurrencyID = model.CurrencyID,
+                                BalanceAmount = Balance,
+                                TimeZoneID = Convert.ToInt32(model.TimeZoneID),
+                                DefaultSMSPrice = DefaultSMSPrice,
+                                TemplateLocked = false,
+                            };
+
+                            string jsonData = JsonConvert.SerializeObject(post_values);
+                            client.BaseAddress = new Uri("http://api.smsala.com/");
+                            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                            HttpResponseMessage response = client.PostAsync("api/RegisterCustomer", content).Result;
+                          
+                            if (response.IsSuccessStatusCode)
+                            {
+
+                                var data = response.Content.ReadAsStringAsync().Result;
+                                dynamic jsonObj = JsonConvert.DeserializeObject(data);
+                               
+                              
+                              
+                            }
+                            else
+                            {
+                                
+                                return "Error Occured While Registering Customer";
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            return ex.Message.ToString();
+                        }
