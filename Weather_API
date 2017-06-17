@@ -1,0 +1,75 @@
+  public weather_data weathers()
+        {
+            weather_data info = new weather_data();
+            string url = string.Format("http://api.openweathermap.org/data/2.5/forecast/daily?q={0}&units=metric&cnt=1&APPID={1}", "Delhi", "7e1e3c9bdc03c307c72933b63f5188be");
+            using (WebClient client = new WebClient())
+            {
+                string json = client.DownloadString(url);
+               
+                WeatherInfo weatherInfo = (new JavaScriptSerializer()).Deserialize<WeatherInfo>(json);
+                //info.city_country = weatherInfo.city.name + "," + weatherInfo.city.country;
+                info.city_country = weatherInfo.city.name;
+                info.flagurl = string.Format("http://openweathermap.org/images/flags/{0}.png", weatherInfo.city.country.ToLower());
+                info.description = weatherInfo.list[0].weather[0].description;
+                info.weathericon = string.Format("http://openweathermap.org/img/w/{0}.png", weatherInfo.list[0].weather[0].icon);
+                info.tempmin = string.Format("{0}°С", Math.Round(weatherInfo.list[0].temp.min, 1));
+                info.tempmax = string.Format("{0}°С", Math.Round(weatherInfo.list[0].temp.max, 1));
+                info.tempday = string.Format("{0}°С", Math.Round(weatherInfo.list[0].temp.day, 1));
+                info.tempnight = string.Format("{0}°С", Math.Round(weatherInfo.list[0].temp.night, 1));
+                info.humidity = weatherInfo.list[0].humidity.ToString();
+               // tblWeather.Visible = true;
+
+            }
+            return info;
+        }
+      /// MODEL 
+      // weather_data.cs
+      public class weather_data
+    {
+        public string city_country { get; set; }
+        public string flagurl { get; set; }
+        public string description { get; set; }
+        public string weathericon { get; set; }
+        public string tempmin { get; set; }
+        public string tempmax { get; set; }
+        public string tempday { get; set; }
+        public string tempnight { get; set; }
+        public string humidity { get; set; }
+    }
+    
+    //weatherInfo.cs
+    public class WeatherInfo
+    {
+        public City city { get; set; }
+        public List<List> list { get; set; }
+
+       
+    }
+
+    public class City
+    {
+        public string name { get; set; }
+        public string country { get; set; }
+    }
+
+    public class Temp
+    {
+        public double day { get; set; }
+        public double min { get; set; }
+        public double max { get; set; }
+        public double night { get; set; }
+    }
+
+    public class Weather
+    {
+        public string description { get; set; }
+        public string icon { get; set; }
+    }
+
+    public class List
+    {
+        public Temp temp { get; set; }
+        public int humidity { get; set; }
+        public List<Weather> weather { get; set; }
+    }
+    
